@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Restaurant Ranking Poll</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .mode-selection {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .mode-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 10px 10px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .mode-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .setup-section, .voting-section, .results-section, .join-section {
+            display: none;
+        }
+        
+        .setup-section.active, .voting-section.active, .results-section.active, .join-section.active, .mode-selection.active {
+            display: block;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .voter-name-section {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .voter-name-input {
+            display: inline-block;
+            width: auto;
+            min-width: 200px;
+            margin: 0 10px;
+        }
+        
+        .ranking-container {
+            margin-bottom: 30px;
+        }
+        
+        .ranking-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #2d3748;
+        }
+        
+        .drop-zone {
+            min-height: 300px;
+            border: 3px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 20px;
+            background: #f7fafc;
+            position: relative;
+        }
+        
+        .drop-zone.drag-over {
+            border-color: #667eea;
+            background: #ebf4ff;
+        }
+        
+        .restaurant-item {
+            background: linear-gradient(135deg, #4fd1c7, #38b2ac);
+            color: white;
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: move;
+            user-select: none;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        
+        .restaurant-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .restaurant-item.dragging {
+            opacity: 0.5;
+        }
+        
+        .rank-number {
+            position: absolute;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #2d3748;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .instructions {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        .vote-result {
+            background: #f0fff4;
+            border: 2px solid #9ae6b4;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .voter-name {
+            font-weight: 700;
+            color: #2f855a;
+            margin-bottom: 10px;
+        }
+        
+        .ranking-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .ranking-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid #c6f6d5;
+        }
+        
+        .ranking-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #a0aec0;
+            font-style: italic;
+            padding: 50px 20px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .share-info {
+            background: #e6fffa;
+            border: 2px solid #81e6d9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .poll-id {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #234e52;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 10px 0;
+            border: 2px solid #81e6d9;
+        }
+        
+        .vote-code-display {
+            background: #fffbeb;
+            border: 2px solid #f6e05e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .vote-code {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #d69e2e;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        
+        .copy-button {
+            background: #d69e2e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .copy-button:hover {
+            background: #b7791f;
+        }
+        
+        .host-controls {
+            background: #f0fff4;
+            border: 2px solid #9ae6b4;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .vote-input-area {
+            margin: 20px 0;
+        }
+        
+        .info-box {
+            background: #ebf8ff;
+            border: 2px solid #90cdf4;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍽️ Family Restaurant Poll</h1>
+        
+        <!-- Mode Selection -->
+        <div class="mode-selection active" id="modeSelection">
+            <p style="text-align: center; color: #4a5568; margin-bottom: 30px;">Choose how you want to use this poll:</p>
+            <button class="mode-button" onclick="selectMode('host')">🎯 Host a Poll</button>
+            <button class="mode-button" onclick="selectMode('join')">👥 Join a Poll</button>
+        </div>
+        
+        <!-- Setup Section -->
+        <div class="setup-section" id="setupSection">
+            <div class="input-group">
+                <label for="option1">Restaurant Option 1:</label>
+                <input type="text" id="option1" placeholder="Enter first restaurant name">
+            </div>
+            <div class="input-group">
+                <label for="option2">Restaurant Option 2:</label>
+                <input type="text" id="option2" placeholder="Enter second restaurant name">
+            </div>
+            <div class="input-group">
+                <label for="option3">Restaurant Option 3:</label>
+                <input type="text" id="option3" placeholder="Enter third restaurant name">
+            </div>
+            <div class="input-group">
+                <label for="option4">Restaurant Option 4:</label>
+                <input type="text" id="option4" placeholder="Enter fourth restaurant name">
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="startVoting()">Create Poll! 🗳️</button>
+            </div>
+        </div>
+        
+        <!-- Join Section -->
+        <div class="join-section" id="joinSection">
+            <div class="info-box">
+                <h3 style="margin-top: 0;">Joining a Poll</h3>
+                <p>To join a poll, you need the poll details from the host. The host will share the restaurant options with you.</p>
+            </div>
+            <div class="input-group">
+                <label>Restaurant Options (one per line):</label>
+                <textarea id="joinOptions" rows="4" placeholder="Paste the restaurant options here, one per line"></textarea>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="joinPoll()">Start Ranking! 🗳️</button>
+                <button onclick="goBack()" style="background: #718096; margin-left: 10px;">Back</button>
+            </div>
+        </div>
+        
+        <!-- Voting Section -->
+        <div class="voting-section" id="votingSection">
+            <div class="voter-name-section">
+                <label for="voterName">Your Name:</label>
+                <input type="text" id="voterName" class="voter-name-input" placeholder="Enter your name">
+                <button onclick="submitVote()" id="submitBtn" style="margin-left: 10px;">Submit Vote</button>
+            </div>
+            
+            <div class="instructions">
+                Drag the restaurants below to rank them from 1 (most preferred) to 4 (least preferred)
+            </div>
+            
+            <div class="ranking-container">
+                <div class="ranking-title">Your Ranking (1 = Most Preferred)</div>
+                <div class="drop-zone" id="dropZone">
+                    <div class="empty-state">Drag restaurants here to rank them</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button onclick="resetRanking()">Reset Ranking</button>
+                <button onclick="newVote()">New Vote</button>
+                <div id="hostControls" class="host-controls" style="display: none;">
+                    <h4>Host Controls</h4>
+                    <button onclick="viewResults()">View All Results</button>
+                    <div class="vote-input-area">
+                        <label for="voteCodeInput">Add vote from someone else:</label>
+                        <textarea id="voteCodeInput" rows="3" placeholder="Paste vote code here"></textarea>
+                        <button onclick="addVoteCode()" style="margin-top: 10px;">Add Vote</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <h2>All Votes</h2>
+            <div id="allResults"></div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="backToVoting()">Back to Voting</button>
+                <button onclick="startOver()">Start New Poll</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let restaurants = [];
+        let allVotes = [];
+        let currentRanking = [];
+        let isHost = false;
+        let pollId = '';
+
+        function selectMode(mode) {
+            document.getElementById('modeSelection').classList.remove('active');
+            
+            if (mode === 'host') {
+                isHost = true;
+                document.getElementById('setupSection').classList.add('active');
+            } else {
+                isHost = false;
+                document.getElementById('joinSection').classList.add('active');
+            }
+        }
+        
+        function goBack() {
+            document.getElementById('setupSection').classList.remove('active');
+            document.getElementById('joinSection').classList.remove('active');
+            document.getElementById('modeSelection').classList.add('active');
+        }
+        
+        function generatePollId() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+        
+        function startVoting() {
+            const option1 = document.getElementById('option1').value.trim();
+            const option2 = document.getElementById('option2').value.trim();
+            const option3 = document.getElementById('option3').value.trim();
+            const option4 = document.getElementById('option4').value.trim();
+            
+            if (!option1 || !option2 || !option3 || !option4) {
+                alert('Please fill in all 4 restaurant options!');
+                return;
+            }
+            
+            restaurants = [option1, option2, option3, option4];
+            pollId = generatePollId();
+            
+            document.getElementById('setupSection').classList.remove('active');
+            document.getElementById('votingSection').classList.add('active');
+            
+            if (isHost) {
+                document.getElementById('hostControls').style.display = 'block';
+                showShareInfo();
+            }
+            
+            createDraggableItems();
+        }
+        
+        function joinPoll() {
+            const optionsText = document.getElementById('joinOptions').value.trim();
+            
+            if (!optionsText) {
+                alert('Please paste the restaurant options!');
+                return;
+            }
+            
+            const options = optionsText.split('\n').map(opt => opt.trim()).filter(opt => opt);
+            
+            if (options.length !== 4) {
+                alert('Please make sure you have exactly 4 restaurant options, one per line!');
+                return;
+            }
+            
+            restaurants = options;
+            
+            document.getElementById('joinSection').classList.remove('active');
+            document.getElementById('votingSection').classList.add('active');
+            
+            createDraggableItems();
+        }
+        
+        function showShareInfo() {
+            const shareInfo = document.createElement('div');
+            shareInfo.className = 'share-info';
+            shareInfo.innerHTML = `
+                <h3>Share with Others</h3>
+                <p>Tell others to visit this page and choose "Join a Poll", then share these restaurant options with them:</p>
+                <div style="text-align: left; background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    ${restaurants.map(restaurant => restaurant).join('<br>')}
+                </div>
+                <button onclick="copyRestaurants()" class="copy-button">Copy Restaurant List</button>
+            `;
+            
+            const votingSection = document.getElementById('votingSection');
+            votingSection.insertBefore(shareInfo, votingSection.firstChild);
+        }
+        
+        function copyRestaurants() {
+            const text = restaurants.join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Restaurant list copied! Share this with others so they can join the poll.');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Restaurant list copied! Share this with others so they can join the poll.');
+            });
+        }
+        
+        function createDraggableItems() {
+            const container = document.createElement('div');
+            container.className = 'draggable-items';
+            container.innerHTML = '<div style="font-weight: 600; margin-bottom: 10px; color: #4a5568;">Available Restaurants:</div>';
+            
+            restaurants.forEach(restaurant => {
+                const item = document.createElement('div');
+                item.className = 'restaurant-item';
+                item.draggable = true;
+                item.textContent = restaurant;
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                container.appendChild(item);
+            });
+            
+            const votingSection = document.getElementById('votingSection');
+            const rankingContainer = votingSection.querySelector('.ranking-container');
+            votingSection.insertBefore(container, rankingContainer);
+            
+            setupDropZone();
+        }
+        
+        function setupDropZone() {
+            const dropZone = document.getElementById('dropZone');
+            dropZone.addEventListener('dragover', handleDragOver);
+            dropZone.addEventListener('drop', handleDrop);
+            dropZone.addEventListener('dragenter', handleDragEnter);
+            dropZone.addEventListener('dragleave', handleDragLeave);
+        }
+        
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.textContent);
+            e.target.classList.add('dragging');
+        }
+        
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+        
+        function handleDragEnter(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+        
+        function handleDragLeave(e) {
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+                e.currentTarget.classList.remove('drag-over');
+            }
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            const restaurantName = e.dataTransfer.getData('text/plain');
+            
+            if (!currentRanking.includes(restaurantName)) {
+                currentRanking.push(restaurantName);
+                updateDropZone();
+                
+                // Remove from available items
+                const draggableItems = document.querySelectorAll('.restaurant-item');
+                draggableItems.forEach(item => {
+                    if (item.textContent === restaurantName && item.parentNode.className === 'draggable-items') {
+                        item.remove();
+                    }
+                });
+            }
+        }
+        
+        function updateDropZone() {
+            const dropZone = document.getElementById('dropZone');
+            dropZone.innerHTML = '';
+            
+            if (currentRanking.length === 0) {
+                dropZone.innerHTML = '<div class="empty-state">Drag restaurants here to rank them</div>';
+                return;
+            }
+            
+            currentRanking.forEach((restaurant, index) => {
+                const item = document.createElement('div');
+                item.className = 'restaurant-item';
+                item.innerHTML = `
+                    <div class="rank-number">${index + 1}</div>
+                    ${restaurant}
+                `;
+                item.style.cursor = 'pointer';
+                item.addEventListener('click', () => removeFromRanking(restaurant));
+                dropZone.appendChild(item);
+            });
+        }
+        
+        function removeFromRanking(restaurant) {
+            const index = currentRanking.indexOf(restaurant);
+            if (index > -1) {
+                currentRanking.splice(index, 1);
+                updateDropZone();
+                
+                // Add back to available items
+                const container = document.querySelector('.draggable-items');
+                const item = document.createElement('div');
+                item.className = 'restaurant-item';
+                item.draggable = true;
+                item.textContent = restaurant;
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+                container.appendChild(item);
+            }
+        }
+        
+        function resetRanking() {
+            currentRanking = [];
+            updateDropZone();
+            
+            // Remove existing draggable items and recreate them
+            const existingContainer = document.querySelector('.draggable-items');
+            if (existingContainer) {
+                existingContainer.remove();
+            }
+            createDraggableItems();
+        }
+        
+        function generateVoteCode(voter, ranking) {
+            const voteData = {
+                voter: voter,
+                ranking: ranking,
+                timestamp: Date.now()
+            };
+            return btoa(JSON.stringify(voteData));
+        }
+        
+        function submitVote() {
+            const voterName = document.getElementById('voterName').value.trim();
+            
+            if (!voterName) {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            if (currentRanking.length !== 4) {
+                alert('Please rank all 4 restaurants before submitting!');
+                return;
+            }
+            
+            const vote = {
+                voter: voterName,
+                ranking: [...currentRanking]
+            };
+            
+            if (isHost) {
+                // Host adds vote directly
+                allVotes.push(vote);
+                alert(`Thanks ${voterName}! Your vote has been recorded.`);
+            } else {
+                // Generate shareable vote code
+                const voteCode = generateVoteCode(voterName, currentRanking);
+                showVoteCode(voterName, voteCode);
+            }
+            
+            // Reset for next voter
+            document.getElementById('voterName').value = '';
+            resetRanking();
+        }
+        
+        function showVoteCode(voterName, voteCode) {
+            const voteCodeDisplay = document.createElement('div');
+            voteCodeDisplay.className = 'vote-code-display';
+            voteCodeDisplay.innerHTML = `
+                <h3>Thanks ${voterName}!</h3>
+                <p>Your vote has been recorded. Please share this code with the poll host:</p>
+                <div class="vote-code">${voteCode}</div>
+                <button onclick="copyVoteCode('${voteCode}')" class="copy-button">Copy Vote Code</button>
+                <p style="margin-top: 15px; font-size: 14px; color: #718096;">The host will add this to collect all votes together.</p>
+            `;
+            
+            const votingSection = document.getElementById('votingSection');
+            const existingDisplay = votingSection.querySelector('.vote-code-display');
+            if (existingDisplay) {
+                existingDisplay.remove();
+            }
+            
+            votingSection.insertBefore(voteCodeDisplay, votingSection.querySelector('.action-buttons'));
+        }
+        
+        function copyVoteCode(voteCode) {
+            navigator.clipboard.writeText(voteCode).then(() => {
+                alert('Vote code copied! Send this to the poll host.');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = voteCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Vote code copied! Send this to the poll host.');
+            });
+        }
+        
+        function addVoteCode() {
+            const voteCodeInput = document.getElementById('voteCodeInput');
+            const voteCode = voteCodeInput.value.trim();
+            
+            if (!voteCode) {
+                alert('Please paste a vote code!');
+                return;
+            }
+            
+            try {
+                const voteData = JSON.parse(atob(voteCode));
+                
+                // Verify the vote has the correct restaurants
+                if (!voteData.ranking || voteData.ranking.length !== 4) {
+                    throw new Error('Invalid vote structure');
+                }
+                
+                // Check if all restaurants in the vote match our poll
+                const validVote = voteData.ranking.every(restaurant => restaurants.includes(restaurant));
+                if (!validVote) {
+                    throw new Error('Vote restaurants do not match this poll');
+                }
+                
+                // Check for duplicate voter
+                if (allVotes.some(vote => vote.voter === voteData.voter)) {
+                    alert(`Vote from ${voteData.voter} has already been added!`);
+                    return;
+                }
+                
+                allVotes.push({
+                    voter: voteData.voter,
+                    ranking: voteData.ranking
+                });
+                
+                alert(`Successfully added vote from ${voteData.voter}!`);
+                voteCodeInput.value = '';
+                
+            } catch (error) {
+                alert('Invalid vote code! Please make sure you copied the complete code.');
+            }
+        }
+        
+        function newVote() {
+            document.getElementById('voterName').value = '';
+            resetRanking();
+            
+            // Remove vote code display if present
+            const existingDisplay = document.querySelector('.vote-code-display');
+            if (existingDisplay) {
+                existingDisplay.remove();
+            }
+        }
+        
+        function viewResults() {
+            document.getElementById('votingSection').classList.remove('active');
+            document.getElementById('resultsSection').classList.add('active');
+            
+            const resultsContainer = document.getElementById('allResults');
+            resultsContainer.innerHTML = '';
+            
+            if (allVotes.length === 0) {
+                resultsContainer.innerHTML = '<p style="text-align: center; color: #718096;">No votes submitted yet.</p>';
+                return;
+            }
+            
+            allVotes.forEach(vote => {
+                const voteDiv = document.createElement('div');
+                voteDiv.className = 'vote-result';
+                voteDiv.innerHTML = `
+                    <div class="voter-name">${vote.voter}'s Ranking:</div>
+                    <ol class="ranking-list">
+                        ${vote.ranking.map(restaurant => `<li>${restaurant}</li>`).join('')}
+                    </ol>
+                `;
+                resultsContainer.appendChild(voteDiv);
+            });
+        }
+        
+        function backToVoting() {
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('votingSection').classList.add('active');
+        }
+        
+        function startOver() {
+            allVotes = [];
+            currentRanking = [];
+            restaurants = [];
+            isHost = false;
+            pollId = '';
+            
+            // Reset all input fields
+            document.getElementById('option1').value = '';
+            document.getElementById('option2').value = '';
+            document.getElementById('option3').value = '';
+            document.getElementById('option4').value = '';
+            document.getElementById('voterName').value = '';
+            document.getElementById('joinOptions').value = '';
+            document.getElementById('voteCodeInput').value = '';
+            
+            // Remove draggable items and other dynamic content
+            const existingContainer = document.querySelector('.draggable-items');
+            if (existingContainer) {
+                existingContainer.remove();
+            }
+            
+            const shareInfo = document.querySelector('.share-info');
+            if (shareInfo) {
+                shareInfo.remove();
+            }
+            
+            const voteCodeDisplay = document.querySelector('.vote-code-display');
+            if (voteCodeDisplay) {
+                voteCodeDisplay.remove();
+            }
+            
+            // Hide all sections and show mode selection
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('votingSection').classList.remove('active');
+            document.getElementById('setupSection').classList.remove('active');
+            document.getElementById('joinSection').classList.remove('active');
+            document.getElementById('modeSelection').classList.add('active');
+            document.getElementById('hostControls').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
